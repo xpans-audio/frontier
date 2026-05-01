@@ -1,0 +1,63 @@
+name: "macOS"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 'Build macOS'
+    runs-on: macos-latest
+    environment: "macOS Sign and Notarize"
+    strategy:
+      matrix:
+        arch: [aarch64, x86_64]
+    steps:
+    - name: Import Apple Developer Certificate
+      uses: apple-actions/import-codesign-certs@v7
+      with:
+        p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
+        p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        
+    - name: Verify Certificate
+      run: |
+        CERT_INFO=$(security find-identity -v -p codesigning | grep "Developer ID Application")
+        CERT_ID=$(echo "$CERT_INFO" | awk -F'"' '{print $2}')
+        echo "CERT_ID=$CERT_ID" >> $GITHUB_ENV
+        echo "Certificate imported."
+        
+    - name: "Setup Rust toolchain"
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        target: ${{ matrix.arch }}-apple-darwin
+        
+    - name: "Setup Node.js"
+      uses: actions/setup-node@v6.4.0
+      
+    - uses: actions/checkout@v5
+    
+    - name: "Install npm dependencies"
+      run: npm install
+        
+    - name: Import App Store Connect API Key
+      env:
+        APPLE_API_KEY_ENCODED: ${{ secrets.APPLE_API_KEY_ENCODED }}
+      run: |
+        echo $APPLE_API_KEY_ENCODED | base64 --decode > AppStoreConnect.p8
+        APPLE_API_KEY_PATH=$(realpath AppStoreConnect.p8)
+        echo "APPLE_API_KEY_PATH=$APPLE_API_KEY_PATH" >> $GITHUB_ENV
+        
+    - name: "Build for ${{ matrix.arch }}"
+      env:
+        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
+        APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+      run: |
+        npm run tauri build -- --target ${{ matrix.arch }}-apple-darwin
+        rm $APPLE_API_KEY_PATH
+    - uses: actions/upload-artifact@v7
+      with:
+        name: macOS-${{ matrix.arch }}
+        path: src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg/*.dmg
+        compression-level: 0

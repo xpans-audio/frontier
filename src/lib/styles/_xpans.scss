@@ -1,0 +1,78 @@
+$active-react-scale: 0.9;
+$active-react-blur: 0.1rem;
+$active-react-brightness: 0.75;
+$border-radius: 0.8rem;
+
+$content-width-px: 1200px;
+$content-width-rem: 75rem;
+
+$content-width: $content-width-px;
+
+$active-filter: blur($active-react-blur) brightness($active-react-brightness);
+
+@font-face {
+    font-family: spaceGrotesk;
+    src: url(/_assets/font/SpaceGrotesk[wght].woff2);
+}
+
+$hue: 273deg;
+
+$extra-dark-purple: hsl($hue, 37%, 6%);
+$dark-purple: hsl($hue, 43%, 12%);
+$extra-dark-purple-translucent: hsla($hue, 37%, 6%, 0.85);
+$extra-dark-purple-transparent: hsla($hue, 37%, 6%, 0);
+$accent-purple: hsl($hue, 95%, 40%);
+$accent-red: hsl(333, 95%, 40%);
+$extra-light-purple: hsl($hue, 68%, 92%);
+$accent-green: hsl($hue - 120deg, 72%, 61%);
+
+$line-height: 1.4;
+$line-height-difference: ($line-height * 1em) - 1em;
+
+@function calculate-line-difference($font-size) {
+    @return ($line-height * $font-size) - $font-size;
+}
+
+@function compensated-length($length, $font-size) {
+    @return $length - calculate-line-difference($font-size);
+}
+
+@function space-length($target-length, $font-size-1, $font-size-2) {
+    @return compensated-length(
+            $target-length,
+            $font-size-1
+        ) - compensated-length($font-size-2, $target-length);
+}
+
+@mixin compensated-padding($padding) {
+    $comp-padding-vertical: $padding - $line-height-difference;
+    padding: $comp-padding-vertical $padding;
+}
+@mixin custom-compensated-padding($padding, $font-size) {
+    $comp-padding-vertical: $padding - calculate-line-difference($font-size);
+    padding: $comp-padding-vertical $padding;
+}
+
+@mixin compensated-margin($margin) {
+    $comp-margin-vertical: $margin - $line-height-difference;
+    margin: $comp-margin-vertical $margin;
+}
+
+:root {
+    line-height: $line-height;
+    --extra-dark-purple: hsl(264, 12, 2);
+    --dark-purple: rgb(20, 18, 23);
+    --light-purple: hsl(263, 13, 66);
+    --green: rgb(86, 227, 159);
+    --green-glow: hsl(151.06, 50%, 12%);
+}
+
+/* .content-width {
+    width: min($content-width, calc(100vw - 2rem));
+    margin: auto;
+} */
+
+@mixin content-width($width) {
+    width: min($width, calc(100vw - 2rem));
+    margin: auto;
+}

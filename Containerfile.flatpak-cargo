@@ -1,0 +1,16 @@
+FROM python:latest
+RUN git clone https://github.com/flatpak/flatpak-builder-tools.git
+WORKDIR /flatpak-builder-tools/cargo
+
+ENV VENV_PATH="/poetry"
+
+RUN python3 -m venv $VENV_PATH; \
+    $VENV_PATH/bin/pip install -U pip setuptools; \
+    $VENV_PATH/bin/pip install poetry
+
+ENV PATH="$VENV_PATH/bin:$PATH"
+
+RUN poetry install
+
+ENTRYPOINT eval $(poetry env activate); \
+    python3 ./flatpak-cargo-generator.py /usr/src/frontier/src-tauri/Cargo.lock -o /usr/src/frontier/cargo-sources.json
