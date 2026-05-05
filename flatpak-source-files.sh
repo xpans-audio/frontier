@@ -1,7 +1,7 @@
 #!/bin/sh
 
 podman build \
-    -f Containerfile.flatpak-node \
+    -f _flatpak/Containerfile.flatpak-node \
     -t frontier-flatpak/node
 
 podman run --rm \
@@ -10,7 +10,7 @@ podman run --rm \
     frontier-flatpak/node
 
 podman build \
-    -f Containerfile.flatpak-cargo \
+    -f _flatpak/Containerfile.flatpak-cargo \
     -t frontier-flatpak/cargo
 
 podman run --rm \

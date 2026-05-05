@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Flatpak dependency files
+node-sources.json
+cargo-sources.json
