@@ -12,13 +12,13 @@ You must have rustup, Cargo, and npm installed to build Frontier.
 Install dependencies:
 
 ```sh
-$ npm install
+$ pnpm install
 ```
 
 Build Frontier:
 
 ```sh
-$ npm run tauri build
+$ pnpm tauri build
 ```
 
 After compilation, Tauri will generate a bundle for your host operating system.
