@@ -1,7 +1,6 @@
 name: "macOS"
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
@@ -17,13 +16,20 @@ jobs:
         with:
           target: ${{ matrix.arch }}-apple-darwin
 
-      - name: "Setup Node.js"
-        uses: actions/setup-node@v6.4.0
-
       - uses: actions/checkout@v5
 
-      - name: "Install npm dependencies"
-        run: npm install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v6.4.0
+        with:
+          cache: "pnpm"
+
+      - name: "Install dependencies"
+        run: pnpm install
 
       - name: Import App Store Connect API Key
         env:
@@ -41,8 +47,9 @@ jobs:
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
         run: |
-          npm run tauri build -- --target ${{ matrix.arch }}-apple-darwin
+          pnpm tauri build --target ${{ matrix.arch }}-apple-darwin
           rm $APPLE_API_KEY_PATH
+
       - uses: actions/upload-artifact@v7
         with:
           name: macOS-${{ matrix.arch }}
